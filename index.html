@@ -7,15 +7,91 @@
     <title>ChawLann</title>
   </head>
   <body>
-    <div id="the-girl-say">
-      做梦梦到你了_(:з)∠)_
-      <br />
-      暂时不告诉你啧 
-    </div>
+    <div id="the-girl-say"></div>
     <div id="author">- ChawLann -</div>
-    <div id="date">- 2015-10-04 -</div>
+    <div id="date">- <span id="say-date"></span> -</div>
     <div id="the-girl">
       《文藝少女養成記》
     </div>
+    <script>
+      var $ = function(selector) {
+        if (selector[0] == '#') {
+          return document.getElementById(selector.substring(1));
+        }
+        if (selector[0] == '.') {
+          return document.getElementsByClassName(selector.substring(1));
+        }
+      }
+      var data;
+      var keys;
+      var idx = 0;
+      var ajax = new XMLHttpRequest();
+      ajax.open('GET', './the-girl-say.json', true);
+      ajax.send();
+      ajax.onreadystatechange = function () {
+        if (ajax.readyState == 4 && ajax.status == 200) {
+          data = JSON.parse(ajax.responseText);
+          keys = Object.keys(data);
+          updateByHash();
+        }
+      }
+      var say = function(key) {
+        content = data[key];
+        location.hash = key;
+        $('#say-date').innerHTML = key;
+        $('#the-girl-say').innerHTML = content;
+      }
+      var next = function() {
+        if (idx < keys.length - 1) {
+          idx = idx + 1;
+        }
+        say(keys[idx]);
+      }
+      var prev = function() {
+        if (idx > 0) {
+          idx = idx - 1;
+        }
+        say(keys[idx]);
+      }
+      var updateByHash = function() {
+        if (keys.indexOf(location.hash.substring(1)) != -1) {
+          idx = keys.indexOf(location.hash.substring(1));
+        }
+        say(keys[idx]);
+      }
+      window.onhashchange = function(e) {
+        updateByHash();
+      }
+      document.onkeydown = function(e) {
+        if (e.keyCode == 37 || e.keyCode == 38) {
+          return prev();
+        }
+        if (e.keyCode == 39 || e.keyCode == 40) {
+          return next();
+        }
+      }
+      var scroll = function (e) {
+        var direct = 0;
+        e = e || window.event;
+        if (e.wheelDelta) {
+          if (e.wheelDelta > 0) {
+            prev();
+          } else {
+            next();
+          }
+          return
+        }
+        if (e.detail) {
+          if (e.detail > 0) {
+            next();
+          } else {
+            prev();
+          }
+          return
+        }
+      }
+      document.body.onmousewheel = scroll;
+      document.body.addEventListener("DOMMouseScroll", scroll);
+    </script>
   </body>
 </html>
