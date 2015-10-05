@@ -25,14 +25,18 @@
       var data;
       var keys;
       var idx = 0;
-      var ajax = new XMLHttpRequest();
-      ajax.open('GET', './the-girl-say.json', true);
-      ajax.send();
-      ajax.onreadystatechange = function () {
-        if (ajax.readyState == 4 && ajax.status == 200) {
-          data = JSON.parse(ajax.responseText);
-          keys = Object.keys(data);
-          updateByHash();
+      var startX, endX;
+      var startY, endY;
+      var loadContent = function() {
+        var ajax = new XMLHttpRequest();
+        ajax.open('GET', './the-girl-say.json', true);
+        ajax.send();
+        ajax.onreadystatechange = function () {
+          if (ajax.readyState == 4 && ajax.status == 200) {
+            data = JSON.parse(ajax.responseText);
+            keys = Object.keys(data);
+            updateByHash();
+          }
         }
       }
       var say = function(key) {
@@ -90,8 +94,43 @@
           return
         }
       }
+      var touchStart = function(e) {
+        e.preventDefault();
+        var touch = e.touches[0];
+        var x = parseInt(touch.pageX);
+        var y = parseInt(touch.pageY);
+        startX = x;
+        startY = y;
+      }
+      var touchMove = function(e) {
+        e.preventDefault();
+        var touch = e.touches[0];
+        var x = parseInt(touch.pageX);
+        var y = parseInt(touch.pageY);
+        endX = x;
+        endY = y;
+      }
+      var touchEnd = function(e) {
+        if (endX - startX > 0) {
+          return prev();
+        } else {
+          return next();
+        }
+        if (endY - startY > 0) {
+          return next();
+        } else {
+          return prev();
+        }
+      }
+      var bindTouchEvent = function() {
+        document.addEventListener('touchstart', touchStart, false);
+        document.addEventListener('touchmove', touchMove, false);
+        document.addEventListener('touchend', touchEnd, false);
+      }
       document.body.onmousewheel = scroll;
       document.body.addEventListener("DOMMouseScroll", scroll);
+      bindTouchEvent();
+      loadContent();
     </script>
   </body>
 </html>
